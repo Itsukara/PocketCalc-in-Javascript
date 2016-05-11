@@ -6,7 +6,7 @@
 <style type="text/css">
 #displayLine {
     width: 400px;
-    font-size: 150%;
+    font-size: 200%;
     text-align: right;
 }
 .container {
@@ -19,8 +19,8 @@
 button {
     display: table-cell;
     width: 100px;
-    height: 40px;
-    font-size: 150%;
+    height: 70px;
+    font-size: 200%;
 }
 </style>
 </head>
@@ -74,8 +74,8 @@ $(function($){
 
     $("button").bind('click', process);
 
-    function process(e) {
-        var buttonStr = e.toElement.textContent;
+    function process() {
+        var buttonStr = this.textContent;
         var display = displayLine.value;
         console.log("process入り口：", "buttonStr=" + buttonStr + ", operand1=" + operand1 + ", operator=" + operator + ", display=" + display);
         if (display == OVERFLOW || display == ZERODIV) {
