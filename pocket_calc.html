@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>Pocket Calculator</title>
+<style type="text/css">
+#displayLine {
+    width: 400px;
+    font-size: 150%;
+    text-align: right;
+}
+.container {
+    display: table;
+    width: 400px;
+}
+.row {
+    display: table-row;
+}
+button {
+    display: table-cell;
+    width: 100px;
+    height: 40px;
+    font-size: 150%;
+}
+</style>
+</head>
+
+<body>
+    <input type="text" size=10 id=displayLine value="0" readonly>
+    <div class="container">
+        <div class="row">
+            <button type="button">BS</button>
+            <button type="button">C</button>
+            <button type="button">AC</button>
+            <button type="button">+</button>
+        </div>
+        <div class="row">
+            <button type="button">7</button>
+            <button type="button">8</button>
+            <button type="button">9</button>
+            <button type="button">-</button>
+        </div>
+        <div class="row">
+            <button type="button">4</button>
+            <button type="button">5</button>
+            <button type="button">6</button>
+            <button type="button">*</button>
+        </div>
+        <div class="row">
+            <button type="button">1</button>
+            <button type="button">2</button>
+            <button type="button">3</button>
+            <button type="button">/</button>
+        </div>
+        <div class="row">
+            <button type="button">0</button>
+            <button type="button">=</button>
+            <button type="button">±</button>
+            <button type="button">%</button>
+        </div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+<script>
+"use strict"
+$(function($){
+    var maxKeta = 15;
+    var maxDouble = 999999999999999.0;
+    var OVERFLOW  = "OVERFLOW (Push AC)";
+    var ZERODIV   = "DIV BY 0 (Push AC)";
+    var operand1  = "";
+    var operator  = "";
+    var firstNum  = true;
+    /* global displayLine */
+
+    $("button").bind('click', process);
+
+    function process(e) {
+        var buttonStr = e.toElement.textContent;
+        var display = displayLine.value;
+        console.log("process入り口：", "buttonStr=" + buttonStr + ", operand1=" + operand1 + ", operator=" + operator + ", display=" + display);
+        if (display == OVERFLOW || display == ZERODIV) {
+            if (buttonStr != "AC") {
+                return;
+            }
+        }
+
+        var displayNum;
+        switch (buttonStr) {
+            case "0":
+            case "1":
+            case "2":
+            case "3":
+            case "4":
+            case "5":
+            case "6":
+            case "7":
+            case "8":
+            case "9":
+                if (firstNum) {
+                    if (operator != "") {
+                        operand1 = display;
+                    }
+                    display = "0";
+                    firstNum = false;
+                }
+                if (display.length >= maxKeta) {
+                    displayLine.value = OVERFLOW;
+                    break;
+                }
+                displayNum = +display;
+                var buttonNum = +buttonStr;
+                displayNum = displayNum * 10 + buttonNum;
+                displayLine.value = displayNum;
+                break;
+
+            case "+":
+            case "-":
+            case "*":
+            case "/":
+            case "=":
+            case "%":
+                if (operator != "" && operand1 != "" && !firstNum) {
+                    var operand1Num = +operand1;
+                    var operand2Num = +display;
+                    switch (operator) {
+                        case "+":
+                            if (Math.abs(operand1Num + operand2Num) > maxDouble) {
+                                displayLine.value = OVERFLOW;
+                            }
+                            else {
+                                displayLine.value = operand1Num + operand2Num;
+                            }
+                            break;
+                        case "-":
+                            if (Math.abs(operand1Num - operand2Num) > maxDouble) {
+                                displayLine.value = OVERFLOW;
+                            }
+                            else {
+                                displayLine.value = operand1Num - operand2Num;
+                            }
+                            break;
+                        case "*":
+                            if (Math.abs(operand1Num * operand2Num) > maxDouble) {
+                                displayLine.value = OVERFLOW;
+                            }
+                            else {
+                                displayLine.value = operand1Num * operand2Num;
+                            }
+                            break;
+                        case "/":
+                            if (operand2Num == 0) {
+                                displayLine.value = ZERODIV;
+                            }
+                            else {
+                                displayLine.value = Math.floor(operand1Num / operand2Num);
+                            }
+                            break;
+                        case "%":
+                            if (operand2Num == 0) {
+                                displayLine.value = ZERODIV;
+                            }
+                            else {
+                                displayLine.value = operand1Num % operand2Num;
+                            }
+                            break;
+                        default:
+                            console.log("ERROR", "operatorが識別できない：" + operator);
+                    }
+                }
+                if (buttonStr == "=") {
+                    operator = "";
+                }
+                else {
+                    operator = buttonStr;
+                }
+                firstNum = true;
+                break;
+
+            case "BS":
+                displayNum = +display;
+                displayNum = Math.floor(displayNum / 10);
+                displayLine.value = displayNum;
+                break;
+
+            case "±":
+                displayNum = +display;
+                displayNum = -displayNum;
+                displayLine.value = displayNum;
+                break;
+
+            case "C":
+                displayLine.value = "0";
+                break;
+
+            case "AC":
+                displayLine.value = "0";
+                operand1 = "";
+                operator = "";
+                break;
+
+            default:
+                console.log("ERROR", "識別できないボタンが押された：" + buttonStr);
+        }
+    }
+});
+</script>
+
+</body>
+</html>
